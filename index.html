@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sammensæt Regeringen – FV26 (24. marts 2026)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ede9e3;
+      --card: #f8f5f0;
+      --border: #d9d3c8;
+      --text: #2a2520;
+      --text-muted: #7a7168;
+      --accent: #4a3f30;
+      --green: #15803d;
+      --blue: #1d4ed8;
+      --sidebar-w: 290px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: #f0ece5;
+      color: var(--text);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    .header-flag { font-size: 1.4rem; }
+    .header h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: -.01em; }
+    .header .sub { font-size: 0.75rem; opacity: .75; margin-top: 1px; }
+    .header-btns { margin-left: auto; display: flex; gap: 8px; }
+
+    .btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-ghost { background: rgba(0,0,0,.06); color: var(--text); border: 1px solid var(--border); }
+    .btn-white { background: var(--accent); color: #f8f5f0; }
+
+    /* ── Info bar ── */
+    .info-bar {
+      background: #edeae4;
+      border-bottom: 1px solid var(--border);
+      padding: 6px 20px;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    /* ── Layout ── */
+    .main { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    /* ── Mandate meter ── */
+    .meter-box {
+      padding: 14px 16px 12px;
+      background: #f0ece5;
+      border-bottom: 1px solid var(--border);
+    }
+    .meter-top { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+    .meter-num { font-size: 2rem; font-weight: 800; line-height: 1; }
+    .meter-num.ok { color: var(--green); }
+    .meter-num.nok { color: var(--accent); }
+    .meter-denom { font-size: 0.78rem; color: var(--text-muted); }
+    .meter-bar-wrap {
+      height: 8px; background: #ddd8cf; border-radius: 4px;
+      position: relative; overflow: visible;
+    }
+    .meter-fill {
+      height: 100%; border-radius: 4px;
+      background: var(--accent);
+      transition: width .3s ease, background .3s;
+    }
+    .meter-fill.ok { background: var(--green); }
+    .meter-line {
+      position: absolute;
+      left: calc(90 / 179 * 100%);
+      top: -4px; bottom: -4px;
+      width: 2px;
+      background: #27272a;
+      border-radius: 1px;
+    }
+    .meter-labels { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; }
+    .meter-labels span:nth-child(2) { font-weight: 700; color: #27272a; }
+    .meter-msg { font-size: 0.76rem; margin-top: 6px; min-height: 18px; }
+
+    /* ── Party list ── */
+    .party-scroll { overflow-y: auto; flex: 1; padding: 10px 10px 16px; }
+    .bloc-label {
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--text-muted);
+      padding: 8px 6px 4px;
+    }
+    .bloc-divider { height: 1px; background: var(--border); margin: 4px 0 8px; }
+
+    .party-row {
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 8px; border-radius: 7px; cursor: pointer;
+      margin-bottom: 2px; transition: background .12s;
+      user-select: none;
+    }
+    .party-row:hover { background: #eae6df; }
+    .party-row.sel { background: #f0fdf4; }
+    .party-row input[type=checkbox] { width: 14px; height: 14px; flex-shrink: 0; accent-color: var(--green); }
+    .party-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .party-ltr { font-weight: 800; font-size: 0.8rem; width: 18px; flex-shrink: 0; }
+    .party-nm { flex: 1; font-size: 0.78rem; line-height: 1.25; }
+    .party-inp {
+      width: 42px; padding: 2px 4px; border: 1px solid var(--border);
+      border-radius: 4px; font-size: 0.76rem; text-align: center;
+      background: #f8f5f0;
+    }
+
+    /* ── Content area ── */
+    .content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 18px; }
+
+    .section-hd {
+      display: flex; align-items: center; gap: 10px;
+      justify-content: space-between; flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .section-title { font-size: 0.95rem; font-weight: 700; }
+    .section-count { font-size: 0.78rem; font-weight: 400; color: var(--text-muted); }
+    .controls { display: flex; gap: 7px; flex-wrap: wrap; }
+
+    .inp-search {
+      padding: 5px 10px; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 0.78rem; width: 170px;
+    }
+    .sel-sort {
+      padding: 5px 8px; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 0.78rem; background: #f8f5f0;
+    }
+
+    /* ── MP Grid ── */
+    .mp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(172px, 1fr)); gap: 8px; }
+
+    .mp-card {
+      background: #f8f5f0; border: 2px solid var(--border);
+      border-radius: 8px; padding: 9px 11px;
+      cursor: pointer; transition: border-color .13s, box-shadow .13s;
+      position: relative;
+    }
+    .mp-card:hover { border-color: #b5afa6; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .mp-card.sel { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(29,78,216,.18); }
+    .mp-card.done { opacity: .58; }
+    .mp-name { font-size: 0.82rem; font-weight: 600; line-height: 1.3; margin-bottom: 5px; }
+    .mp-row { display: flex; align-items: center; justify-content: space-between; gap: 5px; }
+    .mp-badge {
+      display: inline-flex; align-items: center;
+      padding: 1px 7px; border-radius: 10px;
+      font-size: 0.68rem; font-weight: 700; color: white;
+    }
+    .mp-votes { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; }
+    .mp-post {
+      margin-top: 5px; font-size: 0.68rem; color: white;
+      background: var(--blue); border-radius: 4px;
+      padding: 1px 6px; display: inline-block;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+    }
+
+    /* ── Ministry Grid ── */
+    .min-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 9px; }
+
+    .min-card {
+      background: #f8f5f0; border: 2px solid var(--border);
+      border-radius: 9px; padding: 11px 13px;
+      cursor: pointer; transition: border-color .13s, background .13s;
+    }
+    .min-card:hover { border-color: #b5afa6; }
+    .min-card.ready { border-color: var(--blue); background: #eff6ff; }
+    .min-card.filled { border-color: #16a34a; background: #f0fdf4; }
+    .min-ministry { font-size: 0.68rem; color: var(--text-muted); margin-bottom: 2px; font-weight: 500; }
+    .min-title { font-size: 0.82rem; font-weight: 700; line-height: 1.3; margin-bottom: 8px; color: #18181b; }
+    .min-slot { display: flex; align-items: center; gap: 7px; min-height: 28px; }
+    .min-slot.empty { font-size: 0.76rem; color: #9e9890; font-style: italic; }
+    .min-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .min-minister { font-size: 0.82rem; font-weight: 600; flex: 1; }
+    .min-rm {
+      background: none; border: none; color: #d4d4d8;
+      cursor: pointer; font-size: 1.1rem; padding: 0 2px; line-height: 1;
+    }
+    .min-rm:hover { color: var(--accent); }
+
+    /* ── Empty state ── */
+    .empty { text-align: center; padding: 36px 20px; color: var(--text-muted); font-size: 0.85rem; }
+
+    /* ── Modal ── */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.45); z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      background: #f8f5f0; border-radius: 12px;
+      padding: 24px; width: min(680px, 92vw);
+      max-height: 85vh; overflow-y: auto;
+      position: relative;
+    }
+    .modal h2 { font-size: 1.1rem; margin-bottom: 14px; }
+    .modal-close {
+      position: absolute; top: 14px; right: 18px;
+      font-size: 1.4rem; cursor: pointer;
+      background: none; border: none; color: #71717a;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    .sum-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .sum-table th, .sum-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; }
+    .sum-table th { background: #eae6df; font-weight: 600; }
+    .sum-table tr:last-child td { font-weight: 700; background: #eae6df; }
+    .sum-h { font-size: 0.88rem; font-weight: 700; margin: 16px 0 8px; }
+    .sum-note { font-size: 0.72rem; color: var(--text-muted); margin-top: 14px; }
+
+
+    /* ── Ministerpost-slet-knap ── */
+    .min-card-hd { display:flex; justify-content:space-between; align-items:flex-start; gap:4px; }
+    .min-del { background:none; border:none; color:#d4d4d8; cursor:pointer; font-size:0.9rem; padding:0 2px; line-height:1; flex-shrink:0; margin-top:-1px; }
+    .min-del:hover { color:var(--accent); }
+
+    /* ── Tilføj ministerpost ── */
+    .add-min-wrap { margin-top:12px; }
+    .add-min-toggle { background:none; border:1px dashed #d4d4d8; color:var(--text-muted); border-radius:7px; width:100%; padding:8px; font-size:0.78rem; cursor:pointer; transition:all .15s; }
+    .add-min-toggle:hover { border-color:#a1a1aa; color:var(--text); }
+    .add-min-form { display:none; gap:7px; margin-top:8px; flex-wrap:wrap; }
+    .add-min-form.open { display:flex; }
+    .add-min-form input { flex:1; min-width:140px; padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:0.78rem; }
+    .add-min-form button { padding:6px 12px; background:#374151; color:white; border:none; border-radius:6px; font-size:0.78rem; font-weight:600; cursor:pointer; }
+    .add-min-form button:hover { background:#1f2937; }
+
+    /* ── Ekstern person ── */
+    .ext-bar { display:flex; gap:7px; margin-bottom:10px; align-items:center; }
+    .ext-bar input { flex:1; padding:5px 10px; border:1px solid var(--border); border-radius:6px; font-size:0.78rem; }
+    .ext-bar button { padding:5px 12px; background:var(--blue); color:white; border:none; border-radius:6px; font-size:0.76rem; font-weight:600; cursor:pointer; white-space:nowrap; }
+    .ext-bar button:hover { opacity:.85; }
+    .ext-badge { background:#6b7280 !important; }
+    .mp-card.ext-card { border-style: dashed; }
+
+    /* ── Tildeling-modal (åbner ved klik på politiker) ── */
+    #assignOverlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.55); z-index: 300;
+      align-items: flex-start; justify-content: center;
+      padding: 32px 16px; overflow-y: auto;
+    }
+    #assignOverlay.open { display: flex; }
+
+    .assign-modal {
+      background: #f8f5f0; border-radius: 14px;
+      width: min(920px, 96vw);
+      max-height: calc(100vh - 64px);
+      display: flex; flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      overflow: hidden;
+    }
+
+    .assign-hd {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0; background: #f0ece5;
+    }
+    .assign-hd-info { flex: 1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .assign-hd-name { font-size: 1rem; font-weight: 700; }
+    .assign-hd-votes { font-size: 0.75rem; color: var(--text-muted); }
+    .assign-hd-close {
+      background: none; border: none; font-size: 1.4rem;
+      color: #71717a; cursor: pointer; line-height: 1; padding: 2px 6px;
+      border-radius: 6px;
+    }
+    .assign-hd-close:hover { background: #eae6df; color: var(--text); }
+
+    .assign-hint {
+      padding: 7px 18px; font-size: 0.75rem;
+      color: #4a3b28; background: #ede7d9;
+      border-bottom: 1px solid #cfc4ae; flex-shrink: 0;
+    }
+
+    .assign-grid {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .asgn-card {
+      border: 2px solid var(--border); border-radius: 9px;
+      padding: 10px 12px; cursor: pointer;
+      transition: border-color .12s, background .12s;
+    }
+    .asgn-card:hover { border-color: var(--blue); background: #eff6ff; }
+    .asgn-card:hover .asgn-ttl { color: var(--blue); }
+    .asgn-current { border-color: #16a34a !important; background: #f0fdf4 !important; }
+    .asgn-card.asgn-taken { background: #f0ece5; }
+    .asgn-ttl { font-size: 0.8rem; font-weight: 700; line-height: 1.3; margin-bottom: 5px; }
+    .asgn-dept { font-size: 0.67rem; color: var(--text-muted); margin-bottom: 5px; }
+    .asgn-status { display: flex; align-items: center; gap: 5px; min-height: 16px; }
+    .asgn-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .asgn-who { font-size: 0.72rem; color: var(--text-muted); }
+    .asgn-free { font-size: 0.72rem; color: #9e9890; font-style: italic; }
+    .asgn-self { font-size: 0.72rem; color: #16a34a; font-weight: 600; }
+    .asgn-swap { font-size: 0.68rem; color: #d97706; font-style: italic; }
+
+
+    /* ── Inline minister-søgning på ministerkort ── */
+    .min-card.editing { border-color: #5C4A2A !important; background: #faf8f5 !important; cursor: default; overflow: visible; position: relative; z-index: 10; }
+    .min-edit-wrap { position: relative; width: 100%; }
+    .min-edit-input {
+      width: 100%; box-sizing: border-box;
+      border: 1px solid #cfc4ae; border-radius: 6px;
+      padding: 5px 8px; font-size: 0.82rem; font-family: inherit;
+      background: #f8f5f0; color: var(--text); outline: none;
+    }
+    .min-edit-input:focus { border-color: #5C4A2A; box-shadow: 0 0 0 2px rgba(92,74,42,.14); }
+    .min-edit-drop {
+      position: absolute; top: calc(100% + 3px); left: 0; right: 0;
+      background: #f8f5f0; border: 1px solid #cfc4ae; border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.13); z-index: 600;
+      max-height: 220px; overflow-y: auto; display: none;
+    }
+    .min-edit-drop.has-opts { display: block; }
+    .min-edit-opt {
+      padding: 7px 10px; cursor: pointer; font-size: 0.8rem;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .min-edit-opt:hover { background: #f5f0e8; }
+    .min-edit-opt:first-child { border-radius: 8px 8px 0 0; }
+    .min-edit-opt:last-child  { border-radius: 0 0 8px 8px; }
+    .min-edit-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .min-edit-name { font-weight: 600; flex: 1; }
+    .min-edit-party { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
+    .min-edit-taken { opacity: .55; }
+    .min-edit-new  { font-style: italic; color: #78716c; }
+
+
+    /* ── Dark mode override ────────────────────────────────────────────── */
+    [data-theme="dark"] {
+      --bg: #1c1a17;
+      --card: #26241f;
+      --border: #3a3631;
+      --text: #ece7df;
+      --text-muted: #918a7e;
+      --accent: #d4c4a8;
+    }
+    [data-theme="dark"] .header,
+    [data-theme="dark"] .meter-box { background: #25221d; }
+    [data-theme="dark"] .info-bar { background: #221f1b; }
+    [data-theme="dark"] .min-card.filled { background: #1f2d23; border-color: #2d6045; }
+    [data-theme="dark"] .party-row.sel { background: #1f2d23; }
+    [data-theme="dark"] .min-card:hover { border-color: #5a544b; }
+    [data-theme="dark"] .min-edit-input,
+    [data-theme="dark"] .min-edit-drop,
+    [data-theme="dark"] .assign-hd,
+    [data-theme="dark"] .asgn-card { background: var(--card); }
+    [data-theme="dark"] .min-edit-opt:hover { background: #322e28; }
+    [data-theme="dark"] .meter-bar-wrap { background: #3a3631; }
+    [data-theme="dark"] .sum-table th,
+    [data-theme="dark"] .sum-table tr:last-child td { background: #322e28; }
+    [data-theme="dark"] .btn-ghost { background: rgba(255,255,255,.05); }
+    [data-theme="dark"] .asgn-card.asgn-taken { background: #221f1b; }
+
+    /* ── Theme + undo + export knapper ─────────────────────────────────── */
+    .icon-btn {
+      background: rgba(0,0,0,.05); border: 1px solid var(--border);
+      color: var(--text); padding: 4px 9px; border-radius: 6px;
+      cursor: pointer; font-size: 0.95rem; line-height: 1;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .icon-btn:hover { background: rgba(0,0,0,.1); }
+    .icon-btn:disabled { opacity: .4; cursor: not-allowed; }
+    [data-theme="dark"] .icon-btn { background: rgba(255,255,255,.05); }
+    [data-theme="dark"] .icon-btn:hover { background: rgba(255,255,255,.1); }
+
+    /* ── Toast notifikationer ──────────────────────────────────────────── */
+    #toast-container {
+      position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+      display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+    }
+    .toast {
+      background: var(--text); color: var(--bg);
+      padding: 10px 14px; border-radius: 8px;
+      font-size: 0.82rem; min-width: 240px; max-width: 360px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.28);
+      display: flex; align-items: center; gap: 10px;
+      pointer-events: auto;
+      animation: toast-in .22s ease;
+    }
+    .toast.success { background: #15803d; color: white; }
+    .toast.warn    { background: #b45309; color: white; }
+    .toast button {
+      background: none; border: 1px solid currentColor;
+      color: inherit; padding: 3px 10px; border-radius: 5px;
+      cursor: pointer; font-size: 0.74rem; font-weight: 600;
+      white-space: nowrap;
+    }
+    .toast button:hover { opacity: .85; }
+    @keyframes toast-in { from { transform: translateY(20px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+
+    /* ── Bloc-balance under måleren ─────────────────────────────────────── */
+    .bloc-balance {
+      margin-top: 8px; font-size: 0.7rem;
+    }
+    .bloc-balance-bar {
+      height: 6px; border-radius: 3px; overflow: hidden;
+      display: flex; background: #ddd8cf; margin-bottom: 4px;
+    }
+    .bloc-balance-bar > span { height: 100%; transition: width .3s; }
+    .bloc-balance-legend {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      color: var(--text-muted);
+    }
+    .bloc-balance-legend span { display: inline-flex; align-items: center; gap: 3px; }
+    .bloc-balance-legend i {
+      width: 8px; height: 8px; border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* ── Regerings-strip øverst ─────────────────────────────────────────── */
+    .reg-strip-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+    }
+    .reg-strip-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px; flex-wrap: wrap; gap: 8px;
+    }
+    .reg-strip-hd-title {
+      font-size: 0.85rem; font-weight: 700;
+    }
+    .reg-strip-hd-count { font-size: 0.74rem; color: var(--text-muted); }
+    .reg-strip {
+      display: flex; gap: 8px; overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .reg-strip-empty {
+      color: var(--text-muted); font-size: 0.78rem;
+      font-style: italic; padding: 4px 0;
+    }
+    .reg-mini {
+      flex-shrink: 0; min-width: 110px; max-width: 160px;
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 8px; background: var(--bg);
+      display: flex; flex-direction: column; gap: 2px;
+      cursor: pointer; transition: border-color .12s, transform .12s;
+    }
+    .reg-mini:hover { transform: translateY(-1px); border-color: var(--accent); }
+    .reg-mini-row { display: flex; align-items: center; gap: 5px; }
+    .reg-mini-circle {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: 0.66rem;
+      flex-shrink: 0;
+    }
+    .reg-mini-name {
+      font-size: 0.74rem; font-weight: 600;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .reg-mini-title {
+      font-size: 0.66rem; color: var(--text-muted);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* ── Færdig-regering banner ─────────────────────────────────────────── */
+    .complete-banner {
+      background: linear-gradient(135deg, #15803d, #22c55e);
+      color: white; padding: 14px 18px; border-radius: 12px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 6px 24px rgba(22,163,74,.22);
+    }
+    .complete-banner-emoji { font-size: 1.7rem; }
+    .complete-banner-text { flex: 1; }
+    .complete-banner-text strong { font-size: 0.95rem; display: block; margin-bottom: 2px; }
+    .complete-banner-text small { font-size: 0.74rem; opacity: .9; }
+    .complete-banner button {
+      background: white; color: #15803d; border: none;
+      padding: 7px 14px; border-radius: 7px; font-weight: 700;
+      font-size: 0.78rem; cursor: pointer;
+    }
+    .complete-banner button:hover { opacity: .9; }
+
+    /* ── "Vis kun ledige" toggle ────────────────────────────────────────── */
+    .toggle-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border: 1px solid var(--border);
+      border-radius: 14px; font-size: 0.74rem; cursor: pointer;
+      background: var(--card); color: var(--text-muted);
+      transition: all .15s; user-select: none;
+    }
+    .toggle-pill input { display: none; }
+    .toggle-pill.on {
+      background: var(--accent); color: var(--card);
+      border-color: var(--accent);
+    }
+
+    /* ── Foreslået minister-mærke ───────────────────────────────────────── */
+    .min-edit-suggested-hd {
+      padding: 5px 10px; font-size: 0.66rem; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: .05em; background: rgba(0,0,0,.025);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Sidebar mobile toggle ──────────────────────────────────────────── */
+    .sidebar-toggle {
+      display: none; background: none; border: 1px solid var(--border);
+      color: var(--text); padding: 4px 9px; border-radius: 6px;
+      font-size: 0.95rem; cursor: pointer; line-height: 1;
+    }
+
+    /* ── Mobile responsive ──────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .header { padding: 8px 12px; flex-wrap: wrap; gap: 8px; }
+      .header h1 { font-size: 1rem; }
+      .header .sub { display: none; }
+      .header-btns { gap: 4px; }
+      .info-bar { display: none; }
+      .sidebar-toggle { display: inline-flex; }
+      .main { flex-direction: column; }
+      .sidebar {
+        width: 100%; border-right: none;
+        border-bottom: 1px solid var(--border);
+        max-height: 0; overflow: hidden;
+        transition: max-height .25s ease;
+      }
+      .sidebar.open { max-height: 70vh; }
+      .content { padding: 10px; gap: 12px; }
+      .min-grid { grid-template-columns: 1fr; }
+      .mp-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+      .controls { gap: 5px; }
+      .inp-search { width: 130px; }
+      .reg-mini { min-width: 100px; }
+      .assign-modal { width: 96vw; max-height: 90vh; }
+      .assign-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Modal-option fokus (keyboard) ──────────────────────────────────── */
+    .asgn-card.kbd-focus {
+      outline: 3px solid var(--accent);
+      outline-offset: -1px;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <span class="header-flag">🇩🇰</span>
+  <div>
+    <h1>Sammensæt Regeringen</h1>
+    <div class="sub">FV26 · Valgt 24. marts 2026 · Data: valgtal.dk</div>
+  </div>
+  <div class="header-btns">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="Vis/skjul sidebar">☰</button>
+    <button class="icon-btn" id="undoBtn" onclick="undo()" title="Fortryd (Ctrl+Z)">↶</button>
+    <button class="icon-btn" id="redoBtn" onclick="redo()" title="Gendan (Ctrl+Shift+Z)">↷</button>
+    <button class="icon-btn" onclick="toggleTheme()" title="Skift tema" id="themeBtn">🌙</button>
+    <div style="position:relative" id="exportWrap">
+      <button class="icon-btn" onclick="toggleExportMenu(event)" title="Eksportér">⤓</button>
+      <div id="exportMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.15);z-index:50;min-width:180px;">
+        <button onclick="exportJson()" style="display:block;width:100%;text-align:left;background:none;border:none;padding:8px 14px;cursor:pointer;font-size:0.8rem;color:var(--text)">📄 Hent som JSON</button>
+        <button onclick="exportPng()" style="display:block;width:100%;text-align:left;background:none;border:none;padding:8px 14px;cursor:pointer;font-size:0.8rem;color:var(--text)">🖼 Gem som billede (PNG)</button>
+        <button onclick="exportUrl()" style="display:block;width:100%;text-align:left;background:none;border:none;padding:8px 14px;cursor:pointer;font-size:0.8rem;color:var(--text)">🔗 Kopiér delbar URL</button>
+        <label style="display:block;padding:8px 14px;cursor:pointer;font-size:0.8rem;border-top:1px solid var(--border);color:var(--text)">📥 Importér JSON…<input type="file" accept=".json" onchange="importJson(event)" style="display:none"></label>
+      </div>
+    </div>
+    <button class="btn btn-ghost" onclick="confirmReset()">Nulstil</button>
+    <button class="btn btn-white" onclick="openSummary()">Vis overblik</button>
+  </div>
+</header>
+
+<div class="info-bar">
+  <strong>Sådan bruger du værktøjet:</strong>
+  1) Vælg regeringspartier i venstre side — mandatmåleren viser om I undgår et flertal imod (90+ mandater).
+  2) Klik på en politiker for at markere vedkommende (blå ramme).
+  3) Klik på et ministerium for at udnævne den valgte politiker som minister.
+  Mandattal kan redigeres i felterne til højre for hvert parti.
+</div>
+
+<div class="main">
+  <aside class="sidebar">
+    <div class="meter-box">
+      <div class="meter-top">
+        <span class="meter-num nok" id="mNum">0</span>
+        <span class="meter-denom">/ 179 mandater</span>
+      </div>
+      <div class="meter-bar-wrap">
+        <div class="meter-fill" id="mFill" style="width:0%"></div>
+        <div class="meter-line"></div>
+      </div>
+      <div class="meter-labels">
+        <span>0</span><span>Grænse: 90</span><span>179</span>
+      </div>
+      <div class="meter-msg" id="mMsg">Vælg partier til regeringen</div>
+      <div class="bloc-balance" id="blocBalance"></div>
+    </div>
+
+    <div class="party-scroll">
+      <div class="bloc-label">Rød blok</div>
+      <div id="bloc-rod"></div>
+      <div class="bloc-divider"></div>
+      <div class="bloc-label">Center</div>
+      <div id="bloc-center"></div>
+      <div class="bloc-divider"></div>
+      <div class="bloc-label">Blå blok</div>
+      <div id="bloc-blaa"></div>
+      <div class="bloc-divider"></div>
+      <div class="bloc-label">Løsgængere</div>
+      <div id="bloc-loes"></div>
+    </div>
+  </aside>
+
+  <div class="content">
+    <div id="completeBanner" style="display:none"></div>
+    <div class="reg-strip-wrap" id="regStripWrap" style="display:none">
+      <div class="reg-strip-hd">
+        <div>
+          <span class="reg-strip-hd-title">Regeringssammensætning</span>
+          <span class="reg-strip-hd-count" id="regStripCount"></span>
+        </div>
+      </div>
+      <div class="reg-strip" id="regStrip"></div>
+    </div>
+    <section>
+      <div class="section-hd">
+        <div>
+          <span class="section-title">Politikere fra valgte partier</span>
+          <span class="section-count" id="mpCount"></span>
+        </div>
+        <div class="controls">
+          <input class="inp-search" id="searchQ" type="text" placeholder="Søg navn…" oninput="render()">
+          <select class="sel-sort" id="sortBy" onchange="render()">
+            <option value="votes">Personlige stemmer ↓</option>
+            <option value="name">Navn A–Å</option>
+            <option value="party">Parti</option>
+            <option value="storkreds">Storkreds</option>
+            <option value="heavy">Tunge profiler (&gt;20.000)</option>
+          </select>
+          <label class="toggle-pill" id="onlyFreePill">
+            <input type="checkbox" id="onlyFree" onchange="document.getElementById('onlyFreePill').classList.toggle('on', this.checked); render()">
+            <span>Kun ledige</span>
+          </label>
+        </div>
+      </div>
+      <div class="ext-bar">
+        <input id="extName" type="text" placeholder="Skriv navn på ekstern minister (ikke MF)…" onkeydown="if(event.key==='Enter')addExternal()">
+        <button onclick="addExternal()">+ Tilføj ekstern</button>
+      </div>
+      <div class="mp-grid" id="mpGrid"></div>
+    </section>
+
+    <section>
+      <div class="section-hd">
+        <div>
+          <span class="section-title">Ministerier</span>
+          <span class="section-count" id="minCount"></span>
+        </div>
+      </div>
+      <div class="min-grid" id="minGrid"></div>
+      <div class="add-min-wrap">
+        <button class="add-min-toggle" onclick="toggleAddMin()">+ Tilføj ministerpost</button>
+        <div class="add-min-form" id="addMinForm">
+          <input id="newMinTitle" type="text" placeholder="Titel, fx 'Civilminister'" onkeydown="if(event.key==='Enter')addMinistry()">
+          <input id="newMinDept" type="text" placeholder="Ministerium (valgfrit)" onkeydown="if(event.key==='Enter')addMinistry()">
+          <button onclick="addMinistry()">Tilføj</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeSummary()">×</button>
+    <h2>Regeringsoverblik</h2>
+    <div id="summaryBody"></div>
+  </div>
+</div>
+
+<div id="assignOverlay" onclick="if(event.target===this)closeAssignModal()">
+  <div class="assign-modal">
+    <div class="assign-hd">
+      <div class="assign-hd-info" id="assignHdInfo"></div>
+      <button class="assign-hd-close" onclick="closeAssignModal()">×</button>
+    </div>
+    <div class="assign-hint" id="assignHint"></div>
+    <div class="assign-grid" id="assignGrid"></div>
+  </div>
+</div>
+
+
+<script>
+// ═══════════════════════ DATA ═══════════════════════
+
+const PARTIES = [
+  // Rod blok
+  { id:'A', name:'Socialdemokratiet',                      short:'Soc.dem.',      color:'#E3001B', mandater:38, bloc:'rod'    },
+  { id:'B', name:'Radikale Venstre',                       short:'Radikale',      color:'#733280', mandater:10, bloc:'rod'    },
+  { id:'F', name:'SF – Socialistisk Folkeparti',           short:'SF',            color:'#CC004C', mandater:20, bloc:'rod'    },
+  { id:'Ø', name:'Enhedslisten – De Rød-Grønne',          short:'Enhedslisten',  color:'#CC0000', mandater:11, bloc:'rod'    },
+  { id:'Å', name:'Alternativet',                           short:'Alternativet',  color:'#2BAD7E', mandater:5,  bloc:'rod'    },
+  // Center
+  { id:'M', name:'Moderaterne',                            short:'Moderaterne',   color:'#008FAF', mandater:14, bloc:'center' },
+  // Blaa blok
+  { id:'C', name:'Det Konservative Folkeparti',            short:'Konservative',  color:'#1B6B3A', mandater:13, bloc:'blaa'   },
+  { id:'H', name:'Borgernes Parti',                        short:'Borgernes P.',  color:'#1A3A6B', mandater:1,  bloc:'blaa'   },
+  { id:'I', name:'Liberal Alliance',                       short:'Lib. Alliance', color:'#0077CC', mandater:15, bloc:'blaa'   },
+  { id:'O', name:'Dansk Folkeparti',                       short:'DF',            color:'#D4A800', mandater:16, bloc:'blaa'   },
+  { id:'V', name:'Venstre, Danmarks Liberale Parti',       short:'Venstre',       color:'#002D72', mandater:18, bloc:'blaa'   },
+  { id:'Æ', name:'Danmarksdemokraterne – Inger Støjberg',  short:'DanDem',        color:'#9C3B1D', mandater:10, bloc:'blaa'   },
+  // Løsgængere
+  { id:'L', name:'Løsgængere',                             short:'Løsgængere',    color:'#6b7280', mandater:4,  bloc:'loes'   },
+];
+
+const MINISTRIES = [
+  { id:'stats',  title:'Statsminister',                                             ministry:'Statsministeriet' },
+  { id:'vice',   title:'Forsvarsminister',                                          ministry:'Forsvarsministeriet' },
+  { id:'ude',    title:'Udenrigsminister',                                          ministry:'Udenrigsministeriet' },
+  { id:'fin',    title:'Finansminister',                                            ministry:'Finansministeriet' },
+  { id:'okono',  title:'Økonomiminister',                                           ministry:'Økonomiministeriet' },
+  { id:'inds',   title:'Indenrigs- og sundhedsminister',                            ministry:'Indenrigs- og Sundhedsministeriet' },
+  { id:'just',   title:'Justitsminister',                                           ministry:'Justitsministeriet' },
+  { id:'social', title:'Social- og boligminister',                                  ministry:'Social- og Boligministeriet' },
+  { id:'ald',    title:'Ældreminister',                                             ministry:'Ældreministeriet' },
+  { id:'born',   title:'Børne- og undervisningsminister',                           ministry:'Børne- og Undervisningsministeriet' },
+  { id:'udd',    title:'Uddannelses- og forskningsminister',                        ministry:'Uddannelses- og Forskningsministeriet' },
+  { id:'besk',   title:'Beskæftigelsesminister',                                    ministry:'Beskæftigelsesministeriet' },
+  { id:'erh',    title:'Erhvervsminister',                                          ministry:'Erhvervsministeriet' },
+  { id:'skat',   title:'Skatteminister',                                            ministry:'Skatteministeriet' },
+  { id:'trans',  title:'Transportminister',                                         ministry:'Transportministeriet' },
+  { id:'klima',  title:'Klima-, energi- og forsyningsminister',                     ministry:'Klima-, Energi- og Forsyningsministeriet' },
+  { id:'milj',   title:'Miljøminister og minister for ligestilling',                ministry:'Miljøministeriet' },
+  { id:'fod',    title:'Minister for fødevarer, landbrug og fiskeri',               ministry:'Ministeriet for Fødevarer, Landbrug og Fiskeri' },
+  { id:'gron',   title:'Minister for grøn trepart',                                 ministry:'Ministeriet for Grøn Trepart' },
+  { id:'kul',    title:'Kulturminister',                                            ministry:'Kulturministeriet' },
+  { id:'udl',    title:'Udlændinge- og integrationsminister',                       ministry:'Udlændinge- og Integrationsministeriet' },
+  { id:'digital',title:'Minister for digitalisering',                               ministry:'Digitaliseringsministeriet' },
+  { id:'byer',   title:'Minister for byer, landdistrikter og kirkeminister',        ministry:'Ministeriet for Byer og Landdistrikter' },
+  { id:'samf',   title:'Minister for samfundssikkerhed og beredskab',               ministry:'Ministeriet for Samfundssikkerhed og Beredskab' },
+];
+
+// votes = personlige stemmer fra valgtal.dk (FV26, 24. marts 2026)
+// OBS: Venstre (V) opgores som personlige+listestemmer kombineret
+const MPS = [
+  // -- A - Socialdemokratiet (38) --
+  { id:'a01', name:'Mette Frederiksen',          party:'A', votes:41721, storkreds:'Nordjylland' },
+  { id:'a02', name:'Nicolai Wammen',             party:'A', votes:19203, storkreds:'Østjylland' },
+  { id:'a03', name:'Magnus Heunicke',            party:'A', votes:14316, storkreds:'Sjælland' },
+  { id:'a04', name:'Bjorn Brandenborg',          party:'A', votes:12098, storkreds:'Fyn' },
+  { id:'a05', name:'Mattias Tesfaye',            party:'A', votes:11898, storkreds:'Kbh. Omegn' },
+  { id:'a06', name:'Peter Hummelgaard',          party:'A', votes:11637, storkreds:'København' },
+  { id:'a07', name:'Ida Auken',                  party:'A', votes:11286, storkreds:'København' },
+  { id:'a08', name:'Trine Bramsen',              party:'A', votes:8112,  storkreds:'Fyn' },
+  { id:'a09', name:'Simon Kollerup',             party:'A', votes:9050,  storkreds:'Nordjylland' },
+  { id:'a10', name:'Christian Rabjerg Madsen',   party:'A', votes:7844,  storkreds:'Sydjylland' },
+  { id:'a11', name:'Benny Engelbrecht',          party:'A', votes:7275,  storkreds:'Sydjylland' },
+  { id:'a12', name:'Leif Lahn Jensen',           party:'A', votes:6837,  storkreds:'Østjylland' },
+  { id:'a13', name:'Frederik Vad',               party:'A', votes:6763,  storkreds:'Sjælland' },
+  { id:'a14', name:'Ane Halsboe-Jørgensen',      party:'A', votes:6864,  storkreds:'Nordjylland' },
+  { id:'a15', name:'Birgitte Vind',              party:'A', votes:6220,  storkreds:'Sydjylland' },
+  { id:'a16', name:'Jesper Petersen',            party:'A', votes:6188,  storkreds:'Sydjylland' },
+  { id:'a17', name:'Fie Hækkerup',               party:'A', votes:5763,  storkreds:'Nordsjælland' },
+  { id:'a18', name:'Camilla Fabricius',          party:'A', votes:5876,  storkreds:'Østjylland' },
+  { id:'a19', name:'Kaare Dybvad Bek',           party:'A', votes:5848,  storkreds:'Sjælland' },
+  { id:'a20', name:'Flemming Møller Mortensen',  party:'A', votes:5824,  storkreds:'Nordjylland' },
+  { id:'a21', name:'Jeppe Bruus',                party:'A', votes:5501,  storkreds:'Fyn' },
+  { id:'a22', name:'Anders Kronborg',            party:'A', votes:5728,  storkreds:'Sydjylland' },
+  { id:'a23', name:'Morten Bødskov',             party:'A', votes:5643,  storkreds:'Kbh. Omegn' },
+  { id:'a24', name:'Katrine Evelyn Jensen',      party:'A', votes:4721,  storkreds:'Vestjylland' },
+  { id:'a25', name:'Thomas Monberg',             party:'A', votes:4652,  storkreds:'Østjylland' },
+  { id:'a26', name:'Rasmus Stoklund',            party:'A', votes:4528,  storkreds:'Nordsjælland' },
+  { id:'a27', name:'Thomas Skriver Jensen',      party:'A', votes:4231,  storkreds:'Fyn' },
+  { id:'a28', name:'Sofie de Bretteville',       party:'A', votes:4431,  storkreds:'Kbh. Omegn' },
+  { id:'a29', name:'Kasper Rougaard',            party:'A', votes:4476,  storkreds:'Sjælland' },
+  { id:'a30', name:'Malte Larsen (A)',           party:'A', votes:4365,  storkreds:'Østjylland' },
+  { id:'a31', name:'Thomas Klimek',              party:'A', votes:4116,  storkreds:'Nordjylland' },
+  { id:'a32', name:'Trine Birk Andersen',        party:'A', votes:4106,  storkreds:'Sjælland' },
+  { id:'a33', name:'Matilde Powers',             party:'A', votes:4030,  storkreds:'Nordsjælland' },
+  { id:'a34', name:'Anders Kühnau',              party:'A', votes:4043,  storkreds:'Østjylland' },
+  { id:'a35', name:'Anne Paulin',                party:'A', votes:6742,  storkreds:'Vestjylland' },
+  { id:'a36', name:'Mogens Jensen',              party:'A', votes:7010,  storkreds:'Vestjylland' },
+  { id:'a37', name:'Sophie Hæstorp Andersen',    party:'A', votes:2187,  storkreds:'København' },
+  { id:'a38', name:'Lea Wermelín',               party:'A', votes:3837,  storkreds:'Bornholm' },
+
+  // -- B - Radikale Venstre (10) --
+  { id:'b01', name:'Samira Nawa',             party:'B', votes:10372, storkreds:'København' },
+  { id:'b02', name:'Martin Lidegaard',        party:'B', votes:9328,  storkreds:'Nordsjælland' },
+  { id:'b03', name:'Katrine Robsøe',          party:'B', votes:6406,  storkreds:'Østjylland' },
+  { id:'b04', name:'Magnus Georg Jensen',     party:'B', votes:4491,  storkreds:'København' },
+  { id:'b05', name:'Thomas Rohden',           party:'B', votes:4136,  storkreds:'København' },
+  { id:'b06', name:'Zenia Stampe',            party:'B', votes:4242,  storkreds:'Sjælland' },
+  { id:'b07', name:'Stinus Lindgreen',        party:'B', votes:2837,  storkreds:'Kbh. Omegn' },
+  { id:'b08', name:'Anastasia Milthers',      party:'B', votes:2393,  storkreds:'Fyn' },
+  { id:'b09', name:'Philip Vivet',            party:'B', votes:1443,  storkreds:'Vestjylland' },
+  { id:'b10', name:'Steffen Holme Helledie',  party:'B', votes:1124,  storkreds:'Nordjylland' },
+
+  // -- C - Konservative (13) --
+  { id:'c01', name:'Mona Juul',              party:'C', votes:21594, storkreds:'Østjylland' },
+  { id:'c02', name:'Mette Abildgaard',       party:'C', votes:10807, storkreds:'Nordsjælland' },
+  { id:'c03', name:'Lise Bertelsen',         party:'C', votes:6290,  storkreds:'Vestjylland' },
+  { id:'c04', name:'Mai Mercado',            party:'C', votes:6146,  storkreds:'Fyn' },
+  { id:'c05', name:'Marcus Knuth',           party:'C', votes:4394,  storkreds:'Sjælland' },
+  { id:'c06', name:'Christian Vigilius',     party:'C', votes:4295,  storkreds:'Kbh. Omegn' },
+  { id:'c07', name:'Birgitte Bergman',       party:'C', votes:3176,  storkreds:'Nordsjælland' },
+  { id:'c08', name:'Anders Storgaard',       party:'C', votes:3099,  storkreds:'København' },
+  { id:'c09', name:'Helle Bonnesen',         party:'C', votes:2852,  storkreds:'København' },
+  { id:'c10', name:'Sofie Therese Svendsen', party:'C', votes:2488,  storkreds:'Nordjylland' },
+  { id:'c11', name:'Frederik Bloch Münster', party:'C', votes:2081,  storkreds:'Sydjylland' },
+  { id:'c12', name:'Rune Kristensen',        party:'C', votes:1880,  storkreds:'Sjælland' },
+  { id:'c13', name:'Charlotte Green',        party:'C', votes:1425,  storkreds:'Østjylland' },
+
+  // -- F - SF (20) --
+  { id:'f01', name:'Pia Olsen Dyhr',               party:'F', votes:29344, storkreds:'Sjælland' },
+  { id:'f02', name:'Signe Munk',                   party:'F', votes:13806, storkreds:'Vestjylland' },
+  { id:'f03', name:'Jacob Mark',                   party:'F', votes:12139, storkreds:'Nordsjælland' },
+  { id:'f04', name:'Kirsten Normann Andersen',     party:'F', votes:9526,  storkreds:'Østjylland' },
+  { id:'f05', name:'Karina Lorentzen Dehnhardt',   party:'F', votes:8246,  storkreds:'Sydjylland' },
+  { id:'f06', name:'Lisbeth Bech-Nielsen',         party:'F', votes:5494,  storkreds:'København' },
+  { id:'f07', name:'Karsten Hønge',               party:'F', votes:5373,  storkreds:'Fyn' },
+  { id:'f08', name:'Lise Müller',                  party:'F', votes:4732,  storkreds:'Fyn' },
+  { id:'f09', name:'Theresa Berg Andersen',        party:'F', votes:4623,  storkreds:'Nordjylland' },
+  { id:'f10', name:'Nanna Bonde',                  party:'F', votes:4166,  storkreds:'København' },
+  { id:'f11', name:'Sofie Lippert',               party:'F', votes:4516,  storkreds:'Østjylland' },
+  { id:'f12', name:'Charlotte Broman Mølbæk',     party:'F', votes:4356,  storkreds:'Østjylland' },
+  { id:'f13', name:'Sigurd Agersnap',              party:'F', votes:3546,  storkreds:'Kbh. Omegn' },
+  { id:'f14', name:'Sofie F. Villadsen',           party:'F', votes:3349,  storkreds:'Kbh. Omegn' },
+  { id:'f15', name:'Carl Valentin',               party:'F', votes:3271,  storkreds:'København' },
+  { id:'f16', name:'Christina Lykke',             party:'F', votes:3260,  storkreds:'Nordjylland' },
+  { id:'f17', name:'Marianne Bigum',              party:'F', votes:2384,  storkreds:'Nordsjælland' },
+  { id:'f18', name:'Astrid Carøe',                party:'F', votes:1895,  storkreds:'Sjælland' },
+  { id:'f19', name:'Anne Valentina Berthelsen',   party:'F', votes:1782,  storkreds:'Sydjylland' },
+  { id:'f20', name:'Jørgen Kvist',                party:'F', votes:1197,  storkreds:'Sydjylland' },
+
+  // -- H - Borgernes Parti (4) --
+  { id:'h01', name:'Lars Boje Mathiesen',    party:'H', votes:8408, storkreds:'Østjylland' },
+  { id:'h02', name:'Jacob Harris',           party:'H', votes:2307, storkreds:'Sjælland' },
+  { id:'h03', name:'Nadja Natalie Isaksen',  party:'H', votes:1301, storkreds:'Sydjylland' },
+  { id:'h04', name:'Emilie Schytte',         party:'H', votes:533,  storkreds:'Nordsjælland' },
+
+  // -- I - Liberal Alliance (16) --
+  { id:'i01', name:'Alex Vanopslagh',          party:'I', votes:38487, storkreds:'Østjylland' },
+  { id:'i02', name:'Sólbjørg Jakobsen',        party:'I', votes:7618,  storkreds:'Nordjylland' },
+  { id:'i03', name:'Pernille Vermund',         party:'I', votes:5751,  storkreds:'Sjælland' },
+  { id:'i04', name:'Mads Strange',             party:'I', votes:4488,  storkreds:'København' },
+  { id:'i05', name:'Cecilie Liv Hansen',       party:'I', votes:2569,  storkreds:'Sydjylland' },
+  { id:'i06', name:'Helena Artmann Andresen',  party:'I', votes:2387,  storkreds:'Sydjylland' },
+  { id:'i07', name:'Jens Meilvang',            party:'I', votes:2385,  storkreds:'Østjylland' },
+  { id:'i08', name:'Katrine Daugaard',         party:'I', votes:2375,  storkreds:'Fyn' },
+  { id:'i09', name:'Ole Birk Olesen',          party:'I', votes:2886,  storkreds:'København' },
+  { id:'i10', name:'Carsten Bach',             party:'I', votes:2315,  storkreds:'Vestjylland' },
+  { id:'i11', name:'Lars-Christian Brask',     party:'I', votes:1691,  storkreds:'Sjælland' },
+  { id:'i12', name:'Thorbjorn Jacobsen',       party:'I', votes:1836,  storkreds:'Vestjylland' },
+  { id:'i13', name:'Steffen W. Frølund',       party:'I', votes:1868,  storkreds:'Nordsjælland' },
+  { id:'i14', name:'Peter Larsen',             party:'I', votes:1493,  storkreds:'Nordjylland' },
+  { id:'i15', name:'Freja Brandhøj',           party:'I', votes:1566,  storkreds:'Kbh. Omegn' },
+  { id:'i16', name:'Joachim Riis',             party:'I', votes:965,   storkreds:'Sjælland' },
+
+  // -- M - Moderaterne (14) --
+  { id:'m01', name:'Lars Løkke Rasmussen',  party:'M', votes:34636, storkreds:'Sjælland' },
+  { id:'m02', name:'Jakob Engel-Schmidt',   party:'M', votes:8132,  storkreds:'København' },
+  { id:'m03', name:'Lars Aagaard',          party:'M', votes:5685,  storkreds:'Fyn' },
+  { id:'m04', name:'Monika Rubin',          party:'M', votes:4633,  storkreds:'Kbh. Omegn' },
+  { id:'m05', name:'Henrik Frandsen',       party:'M', votes:4471,  storkreds:'Sydjylland' },
+  { id:'m06', name:'Rasmus Lund-Nielsen',   party:'M', votes:3574,  storkreds:'Nordsjælland' },
+  { id:'m07', name:'Caroline Stage',        party:'M', votes:3751,  storkreds:'Østjylland' },
+  { id:'m08', name:'Christina Egelund',     party:'M', votes:3549,  storkreds:'Østjylland' },
+  { id:'m09', name:'Frida Bruun',           party:'M', votes:3193,  storkreds:'Sydjylland' },
+  { id:'m10', name:'Charlotte Bagge',       party:'M', votes:1909,  storkreds:'Sjælland' },
+  { id:'m11', name:'Ellen Emilie',          party:'M', votes:1175,  storkreds:'København' },
+  { id:'m12', name:'Mohammad Rona',         party:'M', votes:1604,  storkreds:'Nordjylland' },
+  { id:'m13', name:'Morten E.G. Brautsch',  party:'M', votes:1585,  storkreds:'Vestjylland' },
+  { id:'m14', name:'Pernille Christensen',  party:'M', votes:885,   storkreds:'Nordsjælland' },
+
+  // -- O - Dansk Folkeparti (16) --
+  { id:'o01', name:'Morten Messerschmidt',    party:'O', votes:50819, storkreds:'Sjælland' },
+  { id:'o02', name:'Peter Kofod',             party:'O', votes:15993, storkreds:'Sydjylland' },
+  { id:'o03', name:'Nick Zimmermann',         party:'O', votes:6007,  storkreds:'Østjylland' },
+  { id:'o04', name:'Mikkel Bjørn',            party:'O', votes:5746,  storkreds:'Kbh. Omegn' },
+  { id:'o05', name:'Mette Thiesen',           party:'O', votes:4555,  storkreds:'Nordsjælland' },
+  { id:'o06', name:'Anders Vistisen',         party:'O', votes:3580,  storkreds:'Nordjylland' },
+  { id:'o07', name:'Alex Ahrendtsen',         party:'O', votes:3281,  storkreds:'Fyn' },
+  { id:'o08', name:'Søren Boel Olesen',       party:'O', votes:2446,  storkreds:'Vestjylland' },
+  { id:'o09', name:'Michael Ndersøe',         party:'O', votes:2075,  storkreds:'Østjylland' },
+  { id:'o10', name:'Allan Feldt',             party:'O', votes:1679,  storkreds:'København' },
+  { id:'o11', name:'Malte Larsen (O)',        party:'O', votes:1036,  storkreds:'Sjælland' },
+  { id:'o12', name:'Mikkel Dencer',           party:'O', votes:750,   storkreds:'Kbh. Omegn' },
+  { id:'o13', name:'Rune Bønnelykke',         party:'O', votes:814,   storkreds:'Sydjylland' },
+  { id:'o14', name:'Josephine Alstrup Kofod', party:'O', votes:734,   storkreds:'Sydjylland' },
+  { id:'o15', name:'Julie Jacobsen',          party:'O', votes:768,   storkreds:'Sjælland' },
+  { id:'o16', name:'Jan Herskov',             party:'O', votes:460,   storkreds:'Sjælland' },
+
+  // -- V - Venstre (18) -- OBS: stemmer er personlige+liste kombineret --
+  { id:'v01', name:'Stephanie Lose',             party:'V', votes:41542, storkreds:'Sydjylland' },
+  { id:'v02', name:'Troels Lund Poulsen',        party:'V', votes:29320, storkreds:'Østjylland' },
+  { id:'v03', name:'Søren Gade',                 party:'V', votes:21607, storkreds:'Vestjylland' },
+  { id:'v04', name:'Marie Bjerre',               party:'V', votes:19961, storkreds:'Nordjylland' },
+  { id:'v05', name:'Preben Bang Henriksen',      party:'V', votes:15980, storkreds:'Nordjylland' },
+  { id:'v06', name:'Sophie Løhde',               party:'V', votes:12514, storkreds:'Nordsjælland' },
+  { id:'v07', name:'Morten Dahlin',              party:'V', votes:12552, storkreds:'Sjælland' },
+  { id:'v08', name:'Marlene Ambo-Rasmussen',     party:'V', votes:9202,  storkreds:'Fyn' },
+  { id:'v09', name:'Anni Matthiesen',            party:'V', votes:7979,  storkreds:'Sydjylland' },
+  { id:'v10', name:'Jacob Jensen',               party:'V', votes:7629,  storkreds:'Sjælland' },
+  { id:'v11', name:'Thomas Danielsen',           party:'V', votes:7606,  storkreds:'Vestjylland' },
+  { id:'v12', name:'Trine Jepsen',               party:'V', votes:6892,  storkreds:'Vestjylland' },
+  { id:'v13', name:'Marie Brixtofté',           party:'V', votes:6513,  storkreds:'Kbh. Omegn' },
+  { id:'v14', name:'Christoffer Aagaard Melson', party:'V', votes:6028,  storkreds:'Sydjylland' },
+  { id:'v15', name:'Amanda Heitmann',            party:'V', votes:5812,  storkreds:'Fyn' },
+  { id:'v16', name:'Louise Louring',             party:'V', votes:5110,  storkreds:'Østjylland' },
+  { id:'v17', name:'Mathilde Hjort Bressum',     party:'V', votes:3707,  storkreds:'Østjylland' },
+  { id:'v18', name:'Peter Juel-Jensen',          party:'V', votes:3493,  storkreds:'Bornholm' },
+
+  // -- AE - Danmarksdemokraterne (10) --
+  { id:'ae1', name:'Inger Støjberg',          party:'Æ', votes:29995, storkreds:'Nordjylland' },
+  { id:'ae2', name:'Mads Fuglede',            party:'Æ', votes:5806,  storkreds:'Vestjylland' },
+  { id:'ae3', name:'Dennis Flydtkjær',        party:'Æ', votes:4360,  storkreds:'Vestjylland' },
+  { id:'ae4', name:'Karina Adsbøl',           party:'Æ', votes:2370,  storkreds:'Sydjylland' },
+  { id:'ae5', name:'Ulrik Knudsen',           party:'Æ', votes:2023,  storkreds:'Sydjylland' },
+  { id:'ae6', name:'Susie Jessen',            party:'Æ', votes:1946,  storkreds:'Sjælland' },
+  { id:'ae7', name:'Hans Kristian Skibby',    party:'Æ', votes:1818,  storkreds:'Østjylland' },
+  { id:'ae8', name:'Kim Edberg Andersen',     party:'Æ', votes:1791,  storkreds:'Nordjylland' },
+  { id:'ae9', name:'Jens Henrik W. Thulesen Dahl', party:'Æ', votes:1447, storkreds:'Fyn' },
+  { id:'ae10',name:'Marlene Harpsøe',         party:'Æ', votes:575,   storkreds:'Nordsjælland' },
+
+  // -- OE - Enhedslisten (11) --
+  { id:'oe1', name:'Pelle Dragsted',            party:'Ø', votes:30707, storkreds:'København' },
+  { id:'oe2', name:'Rosa Lund',                 party:'Ø', votes:8621,  storkreds:'København' },
+  { id:'oe3', name:'Victoria Velásquez',        party:'Ø', votes:4973,  storkreds:'Fyn' },
+  { id:'oe4', name:'Trine Mach',                party:'Ø', votes:3397,  storkreds:'Østjylland' },
+  { id:'oe5', name:'Eva Flyvholm',              party:'Ø', votes:2822,  storkreds:'Sjælland' },
+  { id:'oe6', name:'Ibrahim Benli',             party:'Ø', votes:2740,  storkreds:'Kbh. Omegn' },
+  { id:'oe7', name:'Peder Hvelplund',           party:'Ø', votes:2296,  storkreds:'Nordjylland' },
+  { id:'oe8', name:'Leila Stockmarr',           party:'Ø', votes:1969,  storkreds:'København' },
+  { id:'oe9', name:'Sinem Dybvad Demir',        party:'Ø', votes:1318,  storkreds:'Nordsjælland' },
+  { id:'oe10',name:'Rasmus Vestergaard Madsen', party:'Ø', votes:856,   storkreds:'Sydjylland' },
+  { id:'oe11',name:'Lisbeth Torfing',           party:'Ø', votes:644,   storkreds:'Vestjylland' },
+
+  // -- AA - Alternativet (5) --
+  { id:'aa1', name:'Franciska Rosenkilde', party:'Å', votes:11385, storkreds:'København' },
+  { id:'aa2', name:'Signe Wenneberg',      party:'Å', votes:3349,  storkreds:'Kbh. Omegn' },
+  { id:'aa3', name:'Torsten Gejl',         party:'Å', votes:3316,  storkreds:'Østjylland' },
+  { id:'aa4', name:'Elise Sydendal',       party:'Å', votes:1298,  storkreds:'Sjælland' },
+  { id:'aa5', name:'Anna Bjerre',          party:'Å', votes:1194,  storkreds:'Nordjylland' },
+];
+
+// ═══════════════════════ STATE ═══════════════════════
+const S = {
+  sel: new Set(),
+  mpId: null,
+  assign: {},
+  mandater: Object.fromEntries(PARTIES.map(p => [p.id, p.mandater])),
+  hiddenMin: new Set(),       // fjernede ministerposter (id'er)
+  customMin: [],               // bruger-tilføjede ministerposter
+  externalPersons: [],         // { id, name, party:null, votes:null, external:true }
+  editingMin: null,              // ministerpost-id der redigeres inline
+};
+
+// ═══════════════════════ LOOKUPS ═══════════════════════
+const byParty   = id => PARTIES.find(p => p.id === id);
+const allMin    = () => [...MINISTRIES.filter(m => !S.hiddenMin.has(m.id)), ...S.customMin];
+const allPerson = () => [...MPS, ...S.externalPersons];
+const byMp      = id => allPerson().find(m => m.id === id);
+const totalM    = () => [...S.sel].reduce((s, pid) => s + (S.mandater[pid] || 0), 0);
+const mpMinId   = mpId => Object.entries(S.assign).find(([,v]) => v === mpId)?.[0];
+const fmt       = n => (n != null && n > 0) ? n.toLocaleString('da-DK') : '—';
+
+
+// ═══════════════════════ PERSISTENCE / HISTORY / TOAST ═══════════════════════
+const LS_KEY = 'regering_v3';
+const TH_KEY = 'regering_theme';
+
+function snapshot() {
+  return {
+    sel: [...S.sel],
+    assign: {...S.assign},
+    mandater: {...S.mandater},
+    hiddenMin: [...S.hiddenMin],
+    customMin: S.customMin.map(m => ({...m})),
+    externalPersons: S.externalPersons.map(p => ({...p})),
+  };
+}
+function restore(snap) {
+  S.sel = new Set(snap.sel || []);
+  S.assign = {...(snap.assign || {})};
+  S.mandater = Object.assign(
+    Object.fromEntries(PARTIES.map(p => [p.id, p.mandater])),
+    snap.mandater || {}
+  );
+  S.hiddenMin = new Set(snap.hiddenMin || []);
+  S.customMin = (snap.customMin || []).map(m => ({...m}));
+  S.externalPersons = (snap.externalPersons || []).map(p => ({...p}));
+  S.mpId = null;
+  S.editingMin = null;
+}
+
+function saveState() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(snapshot())); } catch(e) {}
+}
+function loadState() {
+  try {
+    const j = localStorage.getItem(LS_KEY);
+    if (j) { restore(JSON.parse(j)); return true; }
+  } catch(e) {}
+  return false;
+}
+
+const HIST = { stack: [], idx: -1, suppress: false };
+function pushHistory() {
+  if (HIST.suppress) return;
+  HIST.stack = HIST.stack.slice(0, HIST.idx + 1);
+  HIST.stack.push(snapshot());
+  if (HIST.stack.length > 60) HIST.stack.shift();
+  HIST.idx = HIST.stack.length - 1;
+  updateHistButtons();
+}
+function undo() {
+  if (HIST.idx <= 0) { showToast('Intet at fortryde'); return; }
+  HIST.idx--;
+  HIST.suppress = true;
+  restore(HIST.stack[HIST.idx]);
+  HIST.suppress = false;
+  saveState(); render();
+  updateHistButtons();
+  showToast('Fortrudt', { type: 'success' });
+}
+function redo() {
+  if (HIST.idx >= HIST.stack.length - 1) return;
+  HIST.idx++;
+  HIST.suppress = true;
+  restore(HIST.stack[HIST.idx]);
+  HIST.suppress = false;
+  saveState(); render();
+  updateHistButtons();
+}
+function updateHistButtons() {
+  const u = document.getElementById('undoBtn');
+  const r = document.getElementById('redoBtn');
+  if (u) u.disabled = HIST.idx <= 0;
+  if (r) r.disabled = HIST.idx >= HIST.stack.length - 1;
+}
+
+// Toast
+function showToast(msg, opts = {}) {
+  const c = document.getElementById('toast-container');
+  if (!c) return;
+  const t = document.createElement('div');
+  t.className = 'toast' + (opts.type ? ' ' + opts.type : '');
+  const span = document.createElement('span');
+  span.style.flex = '1';
+  span.innerHTML = msg;
+  t.appendChild(span);
+  if (opts.action) {
+    const b = document.createElement('button');
+    b.textContent = opts.actionLabel || 'Fortryd';
+    b.onclick = () => { try { opts.action(); } catch(e){} t.remove(); };
+    t.appendChild(b);
+  }
+  c.appendChild(t);
+  const dur = opts.duration ?? 4000;
+  setTimeout(() => { t.style.transition = 'opacity .25s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 250); }, dur);
+}
+
+// Theme
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  const btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const cur = document.documentElement.dataset.theme || 'light';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem(TH_KEY, next); } catch(e) {}
+}
+
+// Sidebar mobile
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+}
+
+// Reset med bekræftelse
+function confirmReset() {
+  if (!confirm('Nulstil hele regeringen og alle partivalg?')) return;
+  const before = snapshot();
+  resetAll();
+  showToast('Regeringen er nulstillet', {
+    action: () => { restore(before); pushHistory(); saveState(); render(); },
+    actionLabel: 'Fortryd', duration: 6000
+  });
+}
+
+// ═══════════════════════ EXPORT ═══════════════════════
+function toggleExportMenu(e) {
+  e.stopPropagation();
+  const m = document.getElementById('exportMenu');
+  m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+function exportJson() {
+  const data = snapshot();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'regering-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  document.getElementById('exportMenu').style.display = 'none';
+  showToast('JSON downloadet', { type: 'success' });
+}
+function importJson(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const snap = JSON.parse(r.result);
+      pushHistory();
+      restore(snap);
+      saveState(); render();
+      showToast('Regering importeret', { type: 'success' });
+    } catch(err) { showToast('Kunne ikke læse fil', { type: 'warn' }); }
+  };
+  r.readAsText(f);
+  e.target.value = '';
+  document.getElementById('exportMenu').style.display = 'none';
+}
+function exportUrl() {
+  const data = snapshot();
+  const enc = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  const url = location.origin + location.pathname + '#r=' + enc;
+  navigator.clipboard.writeText(url)
+    .then(() => showToast('URL kopieret til udklipsholder', { type: 'success' }))
+    .catch(() => { prompt('Kopiér URL:', url); });
+  document.getElementById('exportMenu').style.display = 'none';
+}
+function loadFromUrl() {
+  const m = location.hash.match(/r=([^&]+)/);
+  if (!m) return false;
+  try {
+    const snap = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+    restore(snap);
+    history.replaceState(null, '', location.pathname);
+    return true;
+  } catch(e) { return false; }
+}
+function exportPng() {
+  // Simpel canvas-baseret eksport af regerings-strip + meter
+  const w = 1100, h = 720;
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  // Baggrund
+  const cs = getComputedStyle(document.documentElement);
+  ctx.fillStyle = cs.getPropertyValue('--bg').trim() || '#ede9e3';
+  ctx.fillRect(0, 0, w, h);
+  // Titel
+  ctx.fillStyle = cs.getPropertyValue('--text').trim() || '#2a2520';
+  ctx.font = 'bold 26px system-ui, sans-serif';
+  ctx.fillText('🇩🇰 Regeringssammensætning', 30, 50);
+  ctx.font = '13px system-ui';
+  ctx.fillStyle = cs.getPropertyValue('--text-muted').trim() || '#7a7168';
+  ctx.fillText('FV26 · ' + new Date().toLocaleDateString('da-DK'), 30, 72);
+  // Mandattal
+  const t = totalM();
+  ctx.font = 'bold 22px system-ui';
+  ctx.fillStyle = t >= 90 ? '#15803d' : '#b45309';
+  ctx.fillText(t + ' / 179 mandater bag regeringen', 30, 110);
+  // Ministre
+  const mins = allMin();
+  let y = 150;
+  ctx.font = 'bold 14px system-ui';
+  ctx.fillStyle = cs.getPropertyValue('--text').trim();
+  ctx.fillText('Ministre:', 30, y); y += 24;
+  ctx.font = '13px system-ui';
+  mins.forEach(min => {
+    if (y > h - 30) return;
+    const mp = S.assign[min.id] ? byMp(S.assign[min.id]) : null;
+    if (mp) {
+      const p = mp.external ? null : byParty(mp.party);
+      ctx.fillStyle = p ? p.color : '#6b7280';
+      ctx.beginPath(); ctx.arc(38, y - 4, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = cs.getPropertyValue('--text').trim();
+      ctx.fillText(min.title + ' — ' + mp.name + (p ? ' (' + p.id + ')' : ' (Ekstern)'), 52, y);
+    } else {
+      ctx.fillStyle = cs.getPropertyValue('--text-muted').trim();
+      ctx.fillText(min.title + ' — ledig', 52, y);
+    }
+    y += 20;
+  });
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'regering-' + new Date().toISOString().slice(0,10) + '.png';
+    a.click(); URL.revokeObjectURL(url);
+    showToast('PNG downloadet', { type: 'success' });
+  });
+  document.getElementById('exportMenu').style.display = 'none';
+}
+
+// ═══════════════════════ REGERINGS-STRIP ═══════════════════════
+function renderRegStrip() {
+  const wrap = document.getElementById('regStripWrap');
+  const strip = document.getElementById('regStrip');
+  const cnt = document.getElementById('regStripCount');
+  const mins = allMin();
+  const filled = mins.filter(m => S.assign[m.id]);
+  if (!filled.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  cnt.textContent = `(${filled.length} af ${mins.length} besat)`;
+  strip.innerHTML = filled.map(min => {
+    const mp = byMp(S.assign[min.id]); if (!mp) return '';
+    const p = mp.external ? null : byParty(mp.party);
+    const color = p ? p.color : '#6b7280';
+    const initials = mp.name.split(' ').map(s => s[0]).slice(0, 2).join('');
+    return `
+      <div class="reg-mini" onclick="openAssignModal('${mp.id}')" title="Klik for at ændre">
+        <div class="reg-mini-row">
+          <span class="reg-mini-circle" style="background:${color}">${initials}</span>
+          <span class="reg-mini-name">${mp.name}</span>
+        </div>
+        <div class="reg-mini-title">${min.title}</div>
+      </div>`;
+  }).join('');
+}
+
+// ═══════════════════════ BLOC BALANCE ═══════════════════════
+const BLOC_COLORS = { rod: '#dc2626', center: '#0891b2', blaa: '#1d4ed8', loes: '#6b7280' };
+const BLOC_LABELS = { rod: 'Rød', center: 'Center', blaa: 'Blå', loes: 'Løsgængere' };
+function renderBlocBalance() {
+  const el = document.getElementById('blocBalance');
+  if (!S.sel.size) { el.innerHTML = ''; return; }
+  const tally = { rod: 0, center: 0, blaa: 0, loes: 0 };
+  [...S.sel].forEach(pid => {
+    const p = byParty(pid); if (!p) return;
+    tally[p.bloc] = (tally[p.bloc] || 0) + (S.mandater[pid] || 0);
+  });
+  const total = Object.values(tally).reduce((a, b) => a + b, 0);
+  if (!total) { el.innerHTML = ''; return; }
+  const segs = ['rod','center','blaa','loes']
+    .filter(b => tally[b] > 0)
+    .map(b => `<span style="width:${(tally[b]/total*100).toFixed(1)}%;background:${BLOC_COLORS[b]}" title="${BLOC_LABELS[b]}: ${tally[b]} mandater"></span>`)
+    .join('');
+  const legend = ['rod','center','blaa','loes']
+    .filter(b => tally[b] > 0)
+    .map(b => `<span><i style="background:${BLOC_COLORS[b]}"></i>${BLOC_LABELS[b]} ${tally[b]}</span>`)
+    .join('');
+  el.innerHTML = `<div class="bloc-balance-bar">${segs}</div><div class="bloc-balance-legend">${legend}</div>`;
+}
+
+// ═══════════════════════ FÆRDIG-BANNER ═══════════════════════
+function renderCompleteBanner() {
+  const el = document.getElementById('completeBanner');
+  const mins = allMin();
+  const filled = mins.filter(m => S.assign[m.id]).length;
+  const t = totalM();
+  if (filled === mins.length && mins.length > 0 && t >= 90) {
+    el.style.display = 'block';
+    el.innerHTML = `
+      <div class="complete-banner">
+        <div class="complete-banner-emoji">🎉</div>
+        <div class="complete-banner-text">
+          <strong>Regeringen er færdig!</strong>
+          <small>${mins.length} ministerposter besat · ${t} mandater bag regeringen</small>
+        </div>
+        <button onclick="openSummary()">Vis overblik</button>
+      </div>`;
+  } else {
+    el.style.display = 'none';
+    el.innerHTML = '';
+  }
+}
+
+// ═══════════════════════ RENDER ═══════════════════════
+function render() {
+  renderParties();
+  renderMeter();
+  renderBlocBalance();
+  renderRegStrip();
+  renderCompleteBanner();
+  renderMps();
+  renderMinistries();
+  saveState();
+}
+
+function renderParties() {
+  const blocs = { rod:[], center:[], blaa:[], loes:[] };
+  PARTIES.forEach(p => blocs[p.bloc]?.push(p));
+  Object.entries(blocs).forEach(([bloc, list]) => {
+    document.getElementById('bloc-' + bloc).innerHTML = list.map(p => {
+      const on = S.sel.has(p.id);
+      const tt = `${p.name}\nMandater: ${S.mandater[p.id]}\nBlok: ${p.bloc==='rod'?'Rød':p.bloc==='blaa'?'Blå':p.bloc==='center'?'Center':'Løsgænger'}`;
+      return `
+        <label class="party-row ${on ? 'sel' : ''}" onclick="toggleParty('${p.id}')" title="${tt}">
+          <input type="checkbox" ${on ? 'checked' : ''} onclick="event.preventDefault()">
+          <span class="party-dot" style="background:${p.color}"></span>
+          <span class="party-ltr">${p.id}</span>
+          <span class="party-nm">${p.short}</span>
+          <input class="party-inp" type="number" min="0" max="179"
+            value="${S.mandater[p.id]}"
+            onclick="event.stopPropagation()"
+            onchange="S.mandater['${p.id}']=+this.value||0; renderMeter()">
+        </label>`;
+    }).join('');
+  });
+}
+
+function renderMeter() {
+  const t = totalM();
+  const ok = t >= 90;
+  const pct = Math.min(100, t / 179 * 100);
+
+  document.getElementById('mNum').textContent = t;
+  document.getElementById('mNum').className = 'meter-num ' + (ok ? 'ok' : 'nok');
+  const fill = document.getElementById('mFill');
+  fill.style.width = pct + '%';
+  fill.className = 'meter-fill' + (ok ? ' ok' : '');
+
+  const msg = document.getElementById('mMsg');
+  if (!S.sel.size) {
+    msg.innerHTML = '<span style="color:#71717a">Vælg partier til regeringen</span>';
+  } else if (ok) {
+    msg.innerHTML = `<strong style="color:#15803d">✓ Flertal opnået</strong> — oppositionen har ${179 - t} mandater`;
+  } else {
+    msg.innerHTML = `<strong style="color:#C8001F">Mangler ${90 - t} mandater</strong> for at undgå flertal imod`;
+  }
+}
+
+function renderMps() {
+  const grid = document.getElementById('mpGrid');
+  const q = document.getElementById('searchQ').value.toLowerCase();
+  const sort = document.getElementById('sortBy').value;
+
+  const onlyFree = document.getElementById('onlyFree')?.checked;
+  const isFree = (id) => !Object.values(S.assign).includes(id);
+
+  // Eksterne personer vises altid (filtreres kun på navn + ledig)
+  let extList = S.externalPersons.filter(m => m.name.toLowerCase().includes(q));
+  if (onlyFree) extList = extList.filter(m => isFree(m.id));
+
+  // MF-kandidater filtreres på parti
+  let mpList = [];
+  if (S.sel.size) {
+    mpList = MPS.filter(m => S.sel.has(m.party) && m.name.toLowerCase().includes(q));
+    if (onlyFree) mpList = mpList.filter(m => isFree(m.id));
+    if (sort === 'votes') mpList.sort((a, b) => b.votes - a.votes);
+    else if (sort === 'name') mpList.sort((a, b) => a.name.localeCompare(b.name, 'da'));
+    else if (sort === 'storkreds') mpList.sort((a, b) => (a.storkreds||'').localeCompare(b.storkreds||'','da') || b.votes - a.votes);
+    else if (sort === 'heavy') { mpList = mpList.filter(m => m.votes >= 20000); mpList.sort((a,b) => b.votes - a.votes); }
+    else mpList.sort((a, b) => a.party.localeCompare(b.party));
+  }
+
+  const total = extList.length + mpList.length;
+  document.getElementById('mpCount').textContent = total ? `(${total} personer)` : '';
+
+  if (!S.sel.size && !extList.length) {
+    grid.innerHTML = '';
+    return;
+  }
+  if (!total) {
+    grid.innerHTML = '<div class="empty">Ingen politikere matcher søgningen</div>';
+    return;
+  }
+
+  const cardHtml = (mp) => {
+    const p = byParty(mp.party);
+    const minId = mpMinId(mp.id);
+    const min = minId ? allMin().find(m => m.id === minId) : null;
+    const sel = S.mpId === mp.id;
+    const isExt = !!mp.external;
+    const badge = isExt
+      ? `<span class="mp-badge ext-badge">Ekstern</span>`
+      : `<span class="mp-badge" style="background:${p.color}">${mp.party}</span>`;
+    const votes = isExt
+      ? `<span class="mp-votes">Ikke MF</span>`
+      : `<span class="mp-votes">${fmt(mp.votes)} st.</span>`;
+    return `
+      <div class="mp-card ${isExt ? 'ext-card' : ''} ${sel ? 'sel' : ''} ${min ? 'done' : ''}" onclick="pickMp('${mp.id}')" title="${(mp.external?'Ekstern person':'') || ((p?p.name:'')+(mp.storkreds?' · '+mp.storkreds:'')+(mp.votes?' · '+fmt(mp.votes)+' personlige stemmer':''))}\nKlik for at udnævne som minister">
+        <div class="mp-name">${mp.name}</div>
+        <div class="mp-row">${badge}${votes}</div>
+        ${isExt ? `<button style="position:absolute;top:6px;right:6px;background:none;border:none;color:#d4d4d8;cursor:pointer;font-size:0.9rem;" onclick="event.stopPropagation();removeExternal('${mp.id}')" title="Fjern">×</button>` : ''}
+        ${min ? `<div class="mp-post">${min.title}</div>` : ''}
+      </div>`;
+  };
+
+  grid.innerHTML = [...extList, ...mpList].map(cardHtml).join('');
+}
+
+function renderMinistries() {
+  const grid = document.getElementById('minGrid');
+  const mins = allMin();
+  const filled = mins.filter(m => S.assign[m.id]).length;
+  document.getElementById('minCount').textContent = `(${filled}/${mins.length} besat)`;
+  const hasMp = !!S.mpId;
+
+  grid.innerHTML = mins.map(min => {
+    const mpId     = S.assign[min.id];
+    const mp       = mpId ? byMp(mpId) : null;
+    const p        = mp && !mp.external ? byParty(mp.party) : null;
+    const dotStyle = p ? `background:${p.color}` : 'background:#6b7280';
+    const isEdit   = S.editingMin === min.id && !mp;
+
+    let slotHtml;
+    if (mp) {
+      slotHtml = `<div class="min-slot">
+        <span class="min-dot" style="${dotStyle}"></span>
+        <span class="min-minister">${mp.name}</span>
+        <button class="min-rm" onclick="event.stopPropagation();remove('${min.id}')" title="Fjern minister">×</button>
+      </div>`;
+    } else if (isEdit) {
+      slotHtml = `<div class="min-slot" style="overflow:visible;padding:0">
+        <div class="min-edit-wrap">
+          <input id="minInp_${min.id}" class="min-edit-input" type="text"
+                 placeholder="Skriv navn…"
+                 oninput="minEditSearch('${min.id}',this.value)"
+                 onkeydown="minEditKey(event,'${min.id}')"
+                 autocomplete="off" spellcheck="false" />
+          <div class="min-edit-drop" id="minDrop_${min.id}"></div>
+        </div>
+      </div>`;
+    } else {
+      slotHtml = `<div class="min-slot empty">
+        <span>${hasMp ? 'Klik for at udnævne' : 'Klik for at tilføje minister'}</span>
+      </div>`;
+    }
+
+    return `
+      <div class="min-card ${mp ? 'filled' : ''} ${isEdit ? 'editing' : ''}"
+           onclick="minCardClick(event,'${min.id}')">
+        <div class="min-card-hd">
+          <div>
+            <div class="min-ministry">${min.ministry || ''}</div>
+            <div class="min-title">${min.title}</div>
+          </div>
+          <button class="min-del" onclick="event.stopPropagation();deleteMinistry('${min.id}')" title="Slet ministerpost">🗑</button>
+        </div>
+        ${slotHtml}
+      </div>`;
+  }).join('');
+
+  // Fokusér input og start tom søgning hvis editing
+  if (S.editingMin) {
+    const inp = document.getElementById('minInp_' + S.editingMin);
+    if (inp) { inp.focus(); }
+  }
+}
+
+// ═══════════════════════ ACTIONS ═══════════════════════
+function toggleParty(id) {
+  pushHistory();
+  if (S.sel.has(id)) {
+    S.sel.delete(id);
+    Object.entries(S.assign).forEach(([mid, mpId]) => {
+      if (byMp(mpId)?.party === id) delete S.assign[mid];
+    });
+    if (byMp(S.mpId)?.party === id) S.mpId = null;
+  } else {
+    S.sel.add(id);
+  }
+  render();
+}
+
+function pickMp(id) {
+  openAssignModal(id);
+}
+
+function assign(minId) {
+  // Bruges stadig af ministerkortet i hoved-visningen (klik uden modal)
+  if (!S.mpId) return;
+  Object.keys(S.assign).forEach(mid => { if (S.assign[mid] === S.mpId) delete S.assign[mid]; });
+  S.assign[minId] = S.mpId;
+  S.mpId = null;
+  render();
+}
+
+
+// ── Inline minister-søgning på ministerkort ──────────────────────────────────
+function minCardClick(event, minId) {
+  event.stopPropagation();
+  const mp = S.assign[minId] ? byMp(S.assign[minId]) : null;
+  if (mp) return;                        // besat kort → intet
+  if (S.mpId) { assign(minId); return; } // politiker er allerede valgt → udnæv
+  if (S.editingMin === minId) return;    // allerede åben
+  S.editingMin = minId;
+  renderMinistries();
+}
+
+function minEditSearch(minId, val) {
+  const drop = document.getElementById('minDrop_' + minId);
+  if (!drop) return;
+  const q = val.trim().toLowerCase();
+
+  const opts = [];
+
+  // Foreslå top 5 fra koalitionen (sorteret på stemmer) når feltet er tomt
+  if (q.length === 0 && S.sel.size) {
+    const taken = new Set(Object.values(S.assign));
+    const sug = MPS
+      .filter(m => S.sel.has(m.party) && !taken.has(m.id))
+      .sort((a, b) => b.votes - a.votes)
+      .slice(0, 5);
+    if (sug.length) {
+      opts.push(`<div class="min-edit-suggested-hd">Forslag fra koalitionen</div>`);
+      sug.forEach(p => {
+        const pty = byParty(p.party);
+        opts.push(`<div class="min-edit-opt" onmousedown="minEditPickMp('${minId}','${p.id}')">
+          <span class="min-edit-dot" style="background:${pty.color}"></span>
+          <span class="min-edit-name">${p.name}</span>
+          <span class="min-edit-party">${pty.id} · ${fmt(p.votes)} st.</span>
+        </div>`);
+      });
+    }
+  }
+
+  if (q.length >= 1) {
+    const all = allPerson();
+    const hits = all.filter(p => p.name.toLowerCase().includes(q)).slice(0, 9);
+    hits.forEach(p => {
+      const pty     = p.external ? null : byParty(p.party);
+      const color   = pty ? pty.color : '#6b7280';
+      const label   = pty ? pty.id : 'Ekstern';
+      const taken   = Object.values(S.assign).includes(p.id);
+      opts.push(`<div class="min-edit-opt ${taken ? 'min-edit-taken' : ''}"
+                      onmousedown="minEditPickMp('${minId}','${p.id}')">
+        <span class="min-edit-dot" style="background:${color}"></span>
+        <span class="min-edit-name">${p.name}</span>
+        <span class="min-edit-party">${label}${taken ? ' · allerede minister' : ''}</span>
+      </div>`);
+    });
+
+    // "Tilføj ekstern"-mulighed, hvis ingen eksakt match
+    const exact = allPerson().find(p => p.name.toLowerCase() === q);
+    if (!exact) {
+      const escaped = val.trim().replace(/'/g, "\'");
+      opts.push(`<div class="min-edit-opt min-edit-new"
+                      onmousedown="minEditPickNew('${minId}','${escaped}')">
+        + Tilføj &ldquo;${val.trim()}&rdquo; som ekstern minister
+      </div>`);
+    }
+  }
+
+  drop.innerHTML = opts.join('');
+  drop.classList.toggle('has-opts', opts.length > 0);
+}
+
+// ═══════════════════════ ASSIGN MED KONFLIKT-WARNING ═══════════════════════
+function findCurrentMinFor(mpId) {
+  return Object.entries(S.assign).find(([mid, id]) => id === mpId)?.[0];
+}
+function reassignWithToast(minId, mpId) {
+  const oldMin = findCurrentMinFor(mpId);
+  const mp = byMp(mpId);
+  const mins = allMin();
+  const newMinObj = mins.find(m => m.id === minId);
+  Object.keys(S.assign).forEach(mid => { if (S.assign[mid] === mpId) delete S.assign[mid]; });
+  S.assign[minId] = mpId;
+  if (oldMin && oldMin !== minId) {
+    const oldMinObj = mins.find(m => m.id === oldMin);
+    showToast(`<strong>${mp.name}</strong> flyttet fra <em>${oldMinObj?.title || '?'}</em> → <em>${newMinObj?.title || '?'}</em>`, { type: 'warn' });
+  }
+}
+
+
+function minEditKey(event, minId) {
+  if (event.key === 'Escape') {
+    S.editingMin = null;
+    renderMinistries();
+    return;
+  }
+  if (event.key === 'Enter') {
+    const drop  = document.getElementById('minDrop_' + minId);
+    const first = drop && drop.querySelector('.min-edit-opt');
+    if (first) {
+      first.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    } else {
+      const v = event.target.value.trim();
+      if (v) minEditPickNew(minId, v);
+    }
+  }
+}
+
+function minEditPickMp(minId, mpId) {
+  pushHistory();
+  reassignWithToast(minId, mpId);
+  S.editingMin = null;
+  render();
+}
+
+function minEditPickNew(minId, name) {
+  pushHistory();
+  let person = S.externalPersons.find(p => p.name.toLowerCase() === name.toLowerCase());
+  if (!person) {
+    person = { id: 'ext_' + Date.now(), name, party: null, votes: null, external: true };
+    S.externalPersons.push(person);
+  }
+  reassignWithToast(minId, person.id);
+  S.editingMin = null;
+  render();
+}
+
+// ── Assign-modal ──────────────────────────────────────────────────────────────
+function openAssignModal(mpId) {
+  S.mpId = mpId;
+  renderAssignModal();
+  document.getElementById('assignOverlay').classList.add('open');
+}
+
+function closeAssignModal() {
+  document.getElementById('assignOverlay').classList.remove('open');
+  S.mpId = null;
+  render();
+}
+
+function renderAssignModal() {
+  const mp  = byMp(S.mpId);
+  if (!mp) return;
+  const p   = mp && !mp.external ? byParty(mp.party) : null;
+  const mins = allMin();
+  const curMinId = mpMinId(S.mpId);
+
+  // Header
+  const badgeHtml = p
+    ? `<span class="mp-badge" style="background:${p.color};font-size:0.72rem">${p.id}</span>`
+    : `<span class="mp-badge ext-badge" style="font-size:0.72rem">Ekstern</span>`;
+  const votesHtml = (mp.votes && mp.votes > 0)
+    ? `<span class="assign-hd-votes">${fmt(mp.votes)} personlige stemmer · ${mp.storkreds||''}</span>`
+    : `<span class="assign-hd-votes">Ikke MF</span>`;
+  document.getElementById('assignHdInfo').innerHTML =
+    `<span class="assign-hd-name">${mp.name}</span>${badgeHtml}${votesHtml}`;
+
+  // Hint
+  document.getElementById('assignHint').textContent = curMinId
+    ? 'Klik en anden post for at flytte · Klik nuværende post for at fjerne · Eller luk vinduet'
+    : 'Klik en ministerpost for at udnævne · Grønne = ledig · Grå = allerede besat';
+
+  // Ministry grid
+  document.getElementById('assignGrid').innerHTML = mins.map(min => {
+    const assignedId = S.assign[min.id];
+    const assignedMp = assignedId ? byMp(assignedId) : null;
+    const isSelf   = assignedId === S.mpId;
+    const isTaken  = !!assignedMp && !isSelf;
+    const aPty     = assignedMp && !assignedMp.external ? byParty(assignedMp.party) : null;
+    const dotColor = aPty ? aPty.color : '#6b7280';
+
+    let statusHtml;
+    if (isSelf) {
+      statusHtml = `<span class="asgn-self">✓ Udnævnt her — klik for at fjerne</span>`;
+    } else if (assignedMp) {
+      statusHtml = `
+        <span class="asgn-dot" style="background:${dotColor}"></span>
+        <span class="asgn-who">${assignedMp.name}</span>
+        <span class="asgn-swap">· klik for at bytte</span>`;
+    } else {
+      statusHtml = `<span class="asgn-free">Ledig</span>`;
+    }
+
+    return `
+      <div class="asgn-card ${isSelf ? 'asgn-current' : ''} ${isTaken ? 'asgn-taken' : ''}"
+           onclick="assignFromModal('${min.id}')">
+        <div class="asgn-ttl">${min.title}</div>
+        ${min.ministry ? `<div class="asgn-dept">${min.ministry}</div>` : ''}
+        <div class="asgn-status">${statusHtml}</div>
+      </div>`;
+  }).join('');
+}
+
+function assignFromModal(minId) {
+  if (!S.mpId) return;
+  pushHistory();
+  if (S.assign[minId] === S.mpId) {
+    const mp = byMp(S.mpId);
+    delete S.assign[minId];
+    if (mp) showToast(`${mp.name} fjernet som minister`, { type: 'warn' });
+  } else {
+    reassignWithToast(minId, S.mpId);
+  }
+  closeAssignModal();
+}
+
+function remove(minId) {
+  const mpId = S.assign[minId];
+  const mp = mpId ? byMp(mpId) : null;
+  const before = snapshot();
+  pushHistory();
+  delete S.assign[minId];
+  render();
+  if (mp) {
+    showToast(`<strong>${mp.name}</strong> fjernet som minister`, {
+      action: () => { restore(before); pushHistory(); render(); },
+      actionLabel: 'Fortryd', duration: 5000
+    });
+  }
+}
+
+function deleteMinistry(minId) {
+  const mins = allMin();
+  const min = mins.find(m => m.id === minId);
+  const before = snapshot();
+  pushHistory();
+  delete S.assign[minId];
+  const isCustom = S.customMin.find(m => m.id === minId);
+  if (isCustom) {
+    S.customMin = S.customMin.filter(m => m.id !== minId);
+  } else {
+    S.hiddenMin.add(minId);
+  }
+  render();
+  showToast(`Ministerpost &ldquo;${min?.title || ''}&rdquo; slettet`, {
+    action: () => { restore(before); pushHistory(); render(); },
+    actionLabel: 'Fortryd', duration: 6000
+  });
+}
+
+function addMinistry() {
+  pushHistory();
+  const titleEl = document.getElementById('newMinTitle');
+  const deptEl  = document.getElementById('newMinDept');
+  const title   = titleEl.value.trim();
+  if (!title) { titleEl.focus(); return; }
+  const id = 'custom_' + Date.now();
+  S.customMin.push({ id, title, ministry: deptEl.value.trim() });
+  titleEl.value = '';
+  deptEl.value  = '';
+  document.getElementById('addMinForm').classList.remove('open');
+  render();
+}
+
+function toggleAddMin() {
+  document.getElementById('addMinForm').classList.toggle('open');
+  if (document.getElementById('addMinForm').classList.contains('open')) {
+    document.getElementById('newMinTitle').focus();
+  }
+}
+
+function addExternal() {
+  const el   = document.getElementById('extName');
+  const name = el.value.trim();
+  if (!name) { el.focus(); return; }
+  const id = 'ext_' + Date.now();
+  S.externalPersons.push({ id, name, party: null, votes: null, external: true });
+  el.value   = '';
+  S.mpId     = id;   // vælg personen med det samme
+  render();
+}
+
+function removeExternal(id) {
+  // Fjern også eventuel tildeling
+  Object.keys(S.assign).forEach(mid => { if (S.assign[mid] === id) delete S.assign[mid]; });
+  S.externalPersons = S.externalPersons.filter(p => p.id !== id);
+  if (S.mpId === id) S.mpId = null;
+  render();
+}
+
+function resetAll() {
+  if (!confirm('Nulstil hele regeringen og start forfra?')) return;
+  S.sel.clear(); S.mpId = null; S.assign = {}; S.hiddenMin = new Set(); S.customMin = []; S.externalPersons = [];
+  render();
+}
+
+// ═══════════════════════ SUMMARY ═══════════════════════
+function openSummary() {
+  const t = totalM();
+  const govRows = [...S.sel].map(pid => {
+    const p = byParty(pid);
+    return `<tr>
+      <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;
+        background:${p.color};margin-right:7px;vertical-align:middle"></span>${p.name} (${p.id})</td>
+      <td style="text-align:center">${S.mandater[pid]}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="2" style="color:#aaa">Ingen partier valgt</td></tr>';
+
+  const mins = allMin();
+  const minRows = mins
+    .filter(m => S.assign[m.id])
+    .map(m => {
+      const mp = byMp(S.assign[m.id]);
+      const p  = mp && !mp.external ? byParty(mp.party) : null;
+      const badge = p
+        ? `<span style="background:${p.color};color:white;padding:1px 8px;border-radius:9px;font-size:.72rem;font-weight:700">${p.id}</span>`
+        : `<span style="background:#6b7280;color:white;padding:1px 8px;border-radius:9px;font-size:.72rem">Ekstern</span>`;
+      return `<tr><td>${m.title}</td><td>${mp.name}</td><td>${badge}</td></tr>`;
+    }).join('') || '<tr><td colspan="3" style="color:#aaa">Ingen ministre udnævnt</td></tr>';
+
+  const vacant = mins.filter(m => !S.assign[m.id]).map(m => `<li>${m.title}</li>`).join('');
+
+  document.getElementById('summaryBody').innerHTML = `
+    <p class="sum-h">Regeringspartier — i alt ${t} mandater${t>=90?' <span style="color:#15803d">✓</span>':' <span style="color:#C8001F">⚠ Mangler '+(90-t)+'</span>'}</p>
+    <table class="sum-table">
+      <tr><th>Parti</th><th style="text-align:center">Mandater</th></tr>
+      ${govRows}
+      <tr><td>Total</td><td style="text-align:center">${t}</td></tr>
+    </table>
+
+    <p class="sum-h">Ministre (${mins.filter(m=>S.assign[m.id]).length}/${mins.length} udnævnt)</p>
+    <table class="sum-table">
+      <tr><th>Post</th><th>Minister</th><th>Parti</th></tr>
+      ${minRows}
+    </table>
+
+    ${vacant ? `<p class="sum-h">Ubesatte poster (${mins.filter(m=>!S.assign[m.id]).length})</p>
+      <ul style="font-size:.8rem;color:#71717a;padding-left:16px;columns:2;gap:16px">${vacant}</ul>` : ''}
+
+    <p class="sum-note">
+      Stemmedata er de officielle personlige stemmer fra Folketingsvalget 24. marts 2026.
+      Kilde: <a href="https://valgtal.dk/fv26/hvem-bliver-valgt" target="_blank">valgtal.dk</a>.
+      OBS: Venstres stemmer er personlige+listestemmer kombineret.
+    </p>`;
+
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeSummary() { document.getElementById('overlay').classList.remove('open'); }
+document.getElementById('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeSummary(); });
+
+// ═══════════════════════ INIT ═══════════════════════
+// Indlæs theme
+try { applyTheme(localStorage.getItem(TH_KEY) || 'light'); } catch(e) { applyTheme('light'); }
+// Indlæs state (URL har forrang over localStorage)
+if (!loadFromUrl()) loadState();
+// Initial historik-snapshot
+HIST.suppress = true; pushHistory(); HIST.suppress = false;
+HIST.idx = 0;
+updateHistButtons();
+render();
+
+// Luk inline-edit + export-menu ved klik udenfor
+document.addEventListener('click', function(e) {
+  if (S.editingMin && !e.target.closest('.min-card.editing')) {
+    S.editingMin = null;
+    renderMinistries();
+  }
+  if (!e.target.closest('#exportWrap')) {
+    const m = document.getElementById('exportMenu');
+    if (m) m.style.display = 'none';
+  }
+});
+
+// Globale genveje
+let kbdFocusIdx = -1;
+function modalKbdNav(e) {
+  const overlay = document.getElementById('assignOverlay');
+  if (!overlay.classList.contains('open')) return;
+  const cards = [...document.querySelectorAll('#assignGrid .asgn-card')];
+  if (!cards.length) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    kbdFocusIdx = Math.min(cards.length - 1, kbdFocusIdx + 1);
+  } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    kbdFocusIdx = Math.max(0, kbdFocusIdx - 1);
+  } else if (e.key === 'Enter' && kbdFocusIdx >= 0) {
+    e.preventDefault();
+    cards[kbdFocusIdx]?.click();
+    return;
+  } else { return; }
+  cards.forEach(c => c.classList.remove('kbd-focus'));
+  if (cards[kbdFocusIdx]) {
+    cards[kbdFocusIdx].classList.add('kbd-focus');
+    cards[kbdFocusIdx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  // Skip hvis fokus er i et tekstfelt
+  const inField = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
+
+  // Esc: luk modaller
+  if (e.key === 'Escape') {
+    if (document.getElementById('assignOverlay').classList.contains('open')) closeAssignModal();
+    else if (document.getElementById('overlay').classList.contains('open')) closeSummary();
+    return;
+  }
+
+  // Modal keyboard nav
+  modalKbdNav(e);
+
+  // Undo/Redo
+  if (!inField && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+    e.preventDefault();
+    if (e.shiftKey) redo(); else undo();
+  }
+});
+
+// Reset kbd-focus når modal åbnes
+const _origOpenAssign = openAssignModal;
+openAssignModal = function(mpId) { kbdFocusIdx = -1; _origOpenAssign(mpId); };
+
+</script>
+<div id="toast-container"></div>
+</body>
+</html>
